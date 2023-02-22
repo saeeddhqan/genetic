@@ -17,8 +17,10 @@ def sel_tournament(fitness_values, tourn_size=3):
 
 	return selected
 
+# This method is called hall of fame(hof)
 def sel_top_k(fitness_values, k_size, reptition_killer=True, epsilon_range=(0.0001, 0.00001)):
 	# fitness_values has reptition values 0.4, 0.4, ..
+
 	if reptition_killer:
 		fitness_values = [x + random.uniform(epsilon_range[0], epsilon_range[1]) for x in fitness_values]
 	idxs = sorted(list(set(fitness_values)), reverse=True)[:k_size]
