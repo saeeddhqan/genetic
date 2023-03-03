@@ -8,9 +8,10 @@ import time
 
 import random
 
-# random.seed(42)
-# from networks import network
-import network
+random.seed(42)
+
+from networks import network
+# import network
 
 
 input_neurons = 3
@@ -69,8 +70,8 @@ for row in data_list[int(0.7 * len(data_list)):]:
 
 def func_error(param):
 	errors = 0
-	net.learning_rate = param[1]
-	net.change_hidden_neuron(int(round(param[0])))
+	net.change_hidden_neuron()
+	net.change_controller(param)
 	for i in range(epoch):
 		for row in training_data_list:
 			errors += net.train(row[0], row[1])
@@ -85,5 +86,5 @@ def func_error(param):
 def fitness_func(params):
 	return func_error(params),
 
-for i in range(1,6):
-	print(fitness_func([39, 0.017647476998619717]))
+# for i in range(1,2):
+# 	print(fitness_func([0.12787446961849971, 0.2703588245462086, 0.6475856660926073, 0.9942801959168225, 0.5896659511394797, 0.2061116118842229, 0.7570567983156401, 0.44364691836076375, 0.6821462364782024, 0.006408612770593269, 0.33976783187043413, 0.16804943072545134]))

@@ -14,22 +14,24 @@ from networks import network_learning_rate as fitness_val_func
 import elitism
 
 
-BOUNDS_LOW =  [4, 0.01]
-BOUNDS_HIGH = [50, 1.00]
+# BOUNDS_LOW =  [4, 0.01]
+# BOUNDS_HIGH = [50, 1.00]
 
-NUM_OF_PARAMS = len(BOUNDS_HIGH)
+BOUNDS_LOW, BOUNDS_HIGH = 0.001, 0.999
+
+NUM_OF_PARAMS = 8
 
 # Genetic Algorithm constants:
 POPULATION_SIZE = 30
 P_CROSSOVER = 0.9  # probability for crossover
-P_MUTATION = 0.99   # probability for mutating an individual
+P_MUTATION = 0.5   # probability for mutating an individual
 MAX_GENERATIONS = 46
-HALL_OF_FAME_SIZE = 1
+HALL_OF_FAME_SIZE = 3
 CROWDING_FACTOR = 16.0  # crowding factor for crossover and mutation
 
 # set the random seed:
-# RANDOM_SEED = 42
-# random.seed(RANDOM_SEED)
+RANDOM_SEED = 42
+random.seed(RANDOM_SEED)
 
 toolbox = base.Toolbox()
 
@@ -39,26 +41,26 @@ creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 # create the Individual class based on list:
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
-# define the hyperparameter attributes individually:
-for i in range(NUM_OF_PARAMS):
-	# "hyperparameter_0", "hyperparameter_1", ...
-	toolbox.register("hyperparameter_" + str(i),
-					 random.uniform,
-					 BOUNDS_LOW[i],
-					 BOUNDS_HIGH[i])
+# # define the hyperparameter attributes individually:
+# for i in range(NUM_OF_PARAMS):
+# 	# "hyperparameter_0", "hyperparameter_1", ...
+# 	toolbox.register("hyperparameter_" + str(i),
+# 					 random.uniform,
+# 					 BOUNDS_LOW[i],
+# 					 BOUNDS_HIGH[i])
 
-# create a tuple containing an attribute generator for each param searched:
-hyperparameters = ()
-for i in range(NUM_OF_PARAMS):
-	hyperparameters = hyperparameters + \
-					  (toolbox.__getattribute__("hyperparameter_" + str(i)),)
+# # create a tuple containing an attribute generator for each param searched:
+# hyperparameters = ()
+# for i in range(NUM_OF_PARAMS):
+# 	hyperparameters = hyperparameters + \
+# 					  (toolbox.__getattribute__("hyperparameter_" + str(i)),)
+
+
+def hyperparameters():
+	return [random.random() for _ in range(NUM_OF_PARAMS)]
 
 # create the individual operator to fill up an Individual instance:
-toolbox.register("individualCreator",
-				 tools.initCycle,
-				 creator.Individual,
-				 hyperparameters,
-				 n=1)
+toolbox.register("individualCreator", tools.initIterate, creator.Individual, hyperparameters)
 
 # create the population operator to generate a list of individuals:
 toolbox.register("populationCreator", tools.initRepeat, list, toolbox.individualCreator)
@@ -69,18 +71,9 @@ toolbox.register("evaluate", fitness_val_func.fitness_func)
 
 # genetic operators:
 toolbox.register("select", tools.selTournament, tournsize=2)
-toolbox.register("mate",
-				 tools.cxSimulatedBinaryBounded,
-				 low=BOUNDS_LOW,
-				 up=BOUNDS_HIGH,
-				 eta=CROWDING_FACTOR)
+toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=BOUNDS_LOW, up=BOUNDS_HIGH, eta=CROWDING_FACTOR)
 
-toolbox.register("mutate",
-				 tools.mutPolynomialBounded,
-				 low=BOUNDS_LOW,
-				 up=BOUNDS_HIGH,
-				 eta=CROWDING_FACTOR,
-				 indpb=1.0 / NUM_OF_PARAMS)
+toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUNDS_LOW, up=BOUNDS_HIGH, eta=CROWDING_FACTOR, indpb=1.0/NUM_OF_PARAMS)
 
 
 # Genetic Algorithm flow:
@@ -103,7 +96,7 @@ def main():
 
 	# print best solution found:
 	print("- Best solution is: ")
-	print("params = ", hof.items[0])
+	print("params = ", hof.items[0], sum(hof.items[0])/len(hof.items[0]))
 	print("Accuracy = %1.5f" % hof.items[0].fitness.values[0])
 
 	# extract statistics:

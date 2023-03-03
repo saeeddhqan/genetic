@@ -3,8 +3,8 @@ import math
 import scipy.special
 import random
 
-max_n = 102
-# random.seed(42)
+max_n = 8
+random.seed(42)
 
 
 class network:
@@ -17,6 +17,8 @@ class network:
 		# it only works for one layer
 		self.neuron1 = np.random.normal(0.0, pow(1, -0.5), (self.input_neurons_len, max_n))
 		self.neuron2 = np.random.normal(0.0, pow(1, -0.5), (max_n, self.output_neurons_len))
+
+		self.controller = np.random.random((1, max_n))
 
 		self.hidden_layers = []
 		self.output_layer = None
@@ -37,18 +39,27 @@ class network:
 		self.errors = 0
 
 
-	def change_hidden_neuron(self, count):
+	def change_hidden_neuron(self, count=max_n):
 		count = round(count)
 		if count <= 0:
 			return False
-		self.hidden_layers = [self.neuron1.T[:count].copy().T]
-		self.output_layer = self.neuron2[:count].copy()
+		
 		self.hidden_neurons_len = count
+		if count == max_n:
+			self.hidden_layers = [self.neuron1.copy()]
+			self.output_layer = self.neuron2.copy()
+		else:
+			self.hidden_layers = [self.neuron1.T[:count].copy().T]
+			self.output_layer = self.neuron2[:count].copy()
+		
 		return True
+
+	def change_controller(self, values):
+		self.controller = np.array(values, ndmin=2).reshape(1, self.hidden_neurons_len)
 
 	def forward(self, inputs):
 		self.layer_io.append(inputs)
-		layer = self.activation(inputs.dot(self.hidden_layers[0]))
+		layer = self.activation(inputs.dot(self.hidden_layers[0])) * self.controller
 		self.layer_io.append(layer)
 		# for x in self.hidden_layers[1:]:
 		# 	layer = self.activation(x.dot(layer))
